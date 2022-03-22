@@ -20,10 +20,12 @@ public class QuerydslBasicTest {
     @Autowired
     EntityManager em;
 
-    JPAQueryFactory queryFactory = new JPAQueryFactory(em);
+    JPAQueryFactory queryFactory;
 
     @BeforeEach
     public void before(){
+        queryFactory = new JPAQueryFactory(em);
+
         Team teamA = new Team("teamA");
         Team teamB = new Team("teamB");
         em.persist(teamA);
@@ -57,5 +59,17 @@ public class QuerydslBasicTest {
                 .fetchOne();
 
         assertThat(findMember.getUsername()).isEqualTo("member1");
+    }
+
+    @Test
+    public void search(){
+        Member findMember = queryFactory
+                .selectFrom(QMember.member)
+                .where(QMember.member.username.eq("member1")
+                        .and(QMember.member.age.eq(10)))
+                .fetchOne();
+
+        assertThat(findMember.getUsername()).isEqualTo("member1");
+        assertThat(findMember.getAge()).isEqualTo(10);
     }
 }
