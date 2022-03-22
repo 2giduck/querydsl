@@ -51,11 +51,9 @@ public class QuerydslBasicTest {
 
     @Test
     public void startQuerydsl(){
-        QMember m = new QMember("m");
-
         Member findMember = queryFactory
-                .selectFrom(m)
-                .where(m.username.eq("member1"))
+                .selectFrom(QMember.member)
+                .where(QMember.member.username.eq("member1"))
                 .fetchOne();
 
         assertThat(findMember.getUsername()).isEqualTo("member1");
