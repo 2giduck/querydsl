@@ -181,4 +181,36 @@ public class QuerydslBasicTest {
 
         assertThat(teamA.get(QTeam.team.name)).isEqualTo("teamA");
     }
+
+    @Test
+    public void join(){
+        List<Member> result = queryFactory
+                .selectFrom(QMember.member)
+                .join(QMember.member.team, QTeam.team)
+                .where(QTeam.team.name.eq("teamA"))
+                .fetch();
+
+        assertThat(result)
+                .extracting("username")
+                .containsExactly("member1", "member2");
+    }
+
+    /**
+     * 회원의 이름이 팀 이름과 같은 회원 조회
+     */
+    @Test
+    public void theta_join(){
+        em.persist(new Member("teamA"));
+        em.persist(new Member("teamB"));
+
+        List<Member> result = queryFactory
+                .select(QMember.member)
+                .from(QMember.member, QTeam.team)
+                .where(QMember.member.username.eq(QTeam.team.name))
+                .fetch();
+
+        assertThat(result)
+                .extracting("username")
+                .containsExactly("teamA", "teamB");
+    }
 }
