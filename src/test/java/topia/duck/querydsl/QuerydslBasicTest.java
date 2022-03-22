@@ -3,12 +3,14 @@ package topia.duck.querydsl;
 import com.querydsl.core.QueryResults;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.dsl.CaseBuilder;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.event.annotation.AfterTestClass;
 import org.springframework.transaction.annotation.Transactional;
 import topia.duck.querydsl.entity.Member;
 import topia.duck.querydsl.entity.QMember;
@@ -308,6 +310,31 @@ public class QuerydslBasicTest {
                         .when(QMember.member.age.between(21, 30)).then("21~30살")
                         .otherwise("기타"))
                 .from(QMember.member)
+                .fetch();
+
+        for (String s: result) {
+            System.out.println("s = " + s);
+        }
+    }
+
+    @Test
+    public void constant(){
+        List<Tuple> result = queryFactory
+                .select(QMember.member.username, Expressions.constant("A"))
+                .from(QMember.member)
+                .fetch();
+
+        for (Tuple tuple: result) {
+            System.out.println("tuple = " + tuple);
+        }
+    }
+
+    @Test
+    public void concat(){
+        List<String> result = queryFactory
+                .select(QMember.member.username.concat("_").concat(QMember.member.age.stringValue()))
+                .from(QMember.member)
+                .where(QMember.member.username.eq("member1"))
                 .fetch();
 
         for (String s: result) {
