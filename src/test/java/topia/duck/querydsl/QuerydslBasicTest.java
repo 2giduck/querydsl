@@ -213,4 +213,17 @@ public class QuerydslBasicTest {
                 .extracting("username")
                 .containsExactly("teamA", "teamB");
     }
+
+    @Test
+    public void join_on_filtering(){
+        List<Tuple> result = queryFactory
+                .select(QMember.member, QTeam.team)
+                .from(QMember.member)
+                .leftJoin(QMember.member.team, QTeam.team).on(QTeam.team.name.eq("teamA"))
+                .fetch();
+        
+        for(Tuple tuple: result){
+            System.out.println("tuple = " + tuple);
+        }
+    }
 }
