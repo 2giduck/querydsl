@@ -1,6 +1,7 @@
 package topia.duck.querydsl;
 
 import com.querydsl.core.QueryResults;
+import com.querydsl.core.Tuple;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -9,6 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import topia.duck.querydsl.entity.Member;
 import topia.duck.querydsl.entity.QMember;
+import topia.duck.querydsl.entity.QTeam;
 import topia.duck.querydsl.entity.Team;
 
 import javax.persistence.EntityManager;
@@ -143,5 +145,40 @@ public class QuerydslBasicTest {
         assertThat(result.getLimit()).isEqualTo(2);
         assertThat(result.getOffset()).isEqualTo(1);
         assertThat(result.getResults().size()).isEqualTo(2);
+    }
+
+    @Test
+    public void aggregation(){
+        List<Tuple> result = queryFactory
+                .select(QMember.member.count(),
+                        QMember.member.age.sum(),
+                        QMember.member.age.avg(),
+                        QMember.member.age.max(),
+                        QMember.member.age.min()
+                        )
+                .from(QMember.member)
+                .fetch();
+
+        Tuple tuple = result.get(0);
+        assertThat(tuple.get(QMember.member.count())).isEqualTo(4);
+    }
+
+    /**
+     * 팀 이름과 각 팀의 평균 연령을 구해라
+     */
+    @Test
+    public void group(){
+        List<Tuple> result = queryFactory
+                .select(QTeam.team.name,
+                        QMember.member.age.avg())
+                .from(QMember.member)
+                .join(QMember.member.team, QTeam.team)
+                .groupBy(QTeam.team.name)
+                .fetch();
+
+        Tuple teamA = result.get(0);
+        Tuple teamB = result.get(1);
+
+        assertThat(teamA.get(QTeam.team.name)).isEqualTo("teamA");
     }
 }
