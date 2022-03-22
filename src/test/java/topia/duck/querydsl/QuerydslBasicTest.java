@@ -14,6 +14,8 @@ import topia.duck.querydsl.entity.QTeam;
 import topia.duck.querydsl.entity.Team;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.PersistenceUnit;
 
 import java.util.List;
 
@@ -221,9 +223,41 @@ public class QuerydslBasicTest {
                 .from(QMember.member)
                 .leftJoin(QMember.member.team, QTeam.team).on(QTeam.team.name.eq("teamA"))
                 .fetch();
-        
+
         for(Tuple tuple: result){
             System.out.println("tuple = " + tuple);
         }
+    }
+
+    @PersistenceUnit
+    EntityManagerFactory emf;
+
+    @Test
+    public void fetchJoinNo(){
+        em.flush();
+        em.clear();
+
+        Member findMember = queryFactory
+                .selectFrom(QMember.member)
+                .where(QMember.member.username.eq("member1"))
+                .fetchOne();
+
+        boolean loaded = emf.getPersistenceUnitUtil().isLoaded(findMember.getTeam());
+        assertThat(loaded).as("패치 조인 미적용").isFalse();
+    }
+
+    @Test
+    public void fetchJoinUse(){
+        em.flush();
+        em.clear();
+
+        Member findMember = queryFactory
+                .selectFrom(QMember.member)
+                .join(QMember.member.team, QTeam.team).fetchJoin()
+                .where(QMember.member.username.eq("member1"))
+                .fetchOne();
+
+        boolean loaded = emf.getPersistenceUnitUtil().isLoaded(findMember.getTeam());
+        assertThat(loaded).as("패치 조인 적용").isTrue();
     }
 }
