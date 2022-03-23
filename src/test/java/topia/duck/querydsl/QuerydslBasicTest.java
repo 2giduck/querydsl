@@ -3,6 +3,7 @@ package topia.duck.querydsl;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.QueryResults;
 import com.querydsl.core.Tuple;
+import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.Expressions;
@@ -462,7 +463,7 @@ public class QuerydslBasicTest {
 
     @Test
     public void dynamicQuery_BooleanBuilder(){
-        String usernameParam = "member11";
+        String usernameParam = "member1";
         Integer ageParam = 10;
 
         List<Member> result = searchMember1(usernameParam, ageParam);
@@ -485,5 +486,30 @@ public class QuerydslBasicTest {
                 .where()
                 .fetch();
     }
+
+    @Test
+    public void dynamicQuery_WhereParam(){
+        String usernameParam = "member1";
+        Integer ageParam = 10;
+
+        List<Member> result = searchMember2(usernameParam, ageParam);
+        assertThat(result.size()).isEqualTo(1);
+    }
+
+    private List<Member> searchMember2(String usernameCond, Integer ageCond) {
+        return queryFactory
+                .selectFrom(QMember.member)
+                .where(usernameEq(usernameCond), ageEq(ageCond))
+                .fetch();
+    }
+
+    private Predicate ageEq(Integer ageCond) {
+        return ageCond == null ?  null : QMember.member.age.eq(ageCond);
+    }
+
+    private Predicate usernameEq(String usernameCond) {
+        return usernameCond == null ?  null : QMember.member.username.eq(usernameCond);
+    }
+
 
 }
