@@ -541,4 +541,17 @@ public class QuerydslBasicTest {
                 .execute();
     }
 
+    @Test
+    public void sqlFunction(){
+        List<String> result = queryFactory
+                .select(Expressions.stringTemplate("function('replace', {0}, {1}, {2})", 
+                        QMember.member.username, "member", "M"))
+                .from(QMember.member)
+                .fetch();
+        
+        for(String s : result){
+            System.out.println("s = " + s);
+        }
+    }
+
 }
