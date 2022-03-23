@@ -14,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.event.annotation.AfterTestClass;
 import org.springframework.transaction.annotation.Transactional;
 import topia.duck.querydsl.dto.MemberDto;
+import topia.duck.querydsl.dto.QMemberDto;
 import topia.duck.querydsl.dto.UserDto;
 import topia.duck.querydsl.entity.Member;
 import topia.duck.querydsl.entity.QMember;
@@ -442,6 +443,18 @@ public class QuerydslBasicTest {
                 .fetch();
 
         for(UserDto memberDto : result){
+            System.out.println("memberDto = " + memberDto);
+        }
+    }
+
+    @Test
+    public void findDtoByQueryProjection(){
+        List<MemberDto> result = queryFactory
+                .select(new QMemberDto(QMember.member.username, QMember.member.age))
+                .from(QMember.member)
+                .fetch();
+
+        for (MemberDto memberDto: result) {
             System.out.println("memberDto = " + memberDto);
         }
     }
